@@ -11,8 +11,8 @@ subroutine c_gfunc(ngas,mgas,x,y,z,h,u,msink,hsink_soft)
 
  !! ACCEPTS THINGS FROM PYTHON
  integer(c_int), intent(in) :: ngas
- real(c_float), intent(in) :: mgas(ngas), h(ngas), u(ngas)
- real(c_float), intent(in) :: x(ngas+1), y(ngas+1), z(ngas+1) 
+ real(c_double), intent(in) :: mgas(ngas), h(ngas), u(ngas)
+ real(c_double), intent(in) :: x(ngas+1), y(ngas+1), z(ngas+1) 
  real(c_float), intent(in) :: msink, hsink_soft
 
  integer, parameter :: ncolumns = 9 ! number of quantities to write

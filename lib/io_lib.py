@@ -271,8 +271,9 @@ def make_IC_Phantom(fname,\
         print(thing, size_type(thing))
         print("")
 
+
     pygfunc.write_data_phantom_interface.c_gfunc(ngas=ngas,
-                                                 mgas=mgas.astype("double"),
+                                                 mgas=mgas,
                                                  x=x,
                                                  y=y,
                                                  z=z,
