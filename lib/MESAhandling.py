@@ -45,33 +45,42 @@ def strip_MESA_header(in_filename, out_filename, *args, **kwargs):
         thefile.write("%s\n" % item)
     return  thefile, outfn
 
-
+mesa_output_fields = {}
 
 def get_MESA_output_fields(filename):
+    if filename in mesa_output_fields:
+        return mesa_output_fields[filename]
     inf=open(filename,'r')
     line = inf.readlines()[5:6] 
     p=line[0].split()
     phys_dict={}            
     for i,v in enumerate(p):
         phys_dict[str(v).strip()]=i
-    return phys_dict
+    mesa_output_fields[filename] = phys_dict
+    return mesa_output_fields[filename]
 
+
+mesa_output_data = {}
 
 def get_column(filename,keyname):
-    inf=open(filename,'r')
-    inf.seek(0)
+    if (filename, keyname) in mesa_output_data:
+        return mesa_output_data[filename, keyname]
     phys_dict=get_MESA_output_fields(filename)
     indx=phys_dict.get(str(keyname))
     column=[] 
-    data = inf.readlines()[6:]
+    inf=open(filename,'r')
+    inf.seek(0)
+    mesa_output_data[filename] = inf.readlines()[6:]
+    inf.close()
+    data = mesa_output_data[filename]
     for line in data:
         try:
             p=line.split()
             column.append(p[indx])
         except IndexError:
             pass
-    inf.close()
-    return np.array(column), type(column)
+    mesa_output_data[filename, keyname] = np.array(column), type(column)
+    return mesa_output_data[filename, keyname]
 
 
 
@@ -84,8 +93,11 @@ def get_columns(filename,keyname_list):
     return column_dict
 
 
+mesa_quantity_data = {}
 
 def get_quantity(readfile,keyname):
+    if (readfile, keyname) in mesa_quantity_data:
+        return mesa_quantity_data[readfile, keyname]
     keyname=str(keyname)
     keyname_list=get_MESA_output_fields(readfile).keys()
     column_dict=get_columns(readfile,keyname_list)
@@ -103,7 +115,8 @@ def get_quantity(readfile,keyname):
             only_numbers.append(float(q))
         except ValueError:
             pass
-    return np.array(only_numbers).astype(float)
+    mesa_quantity_data[readfile, keyname] = np.array(only_numbers).astype(float)
+    return mesa_quantity_data[readfile, keyname]
 
 
 
