@@ -23,7 +23,7 @@ from scipy.optimize import curve_fit
 import sys
 from MESA2HYDRO.lib import MESAhandling as MJ
 from MESA2HYDRO.lib import mainlib as mn
-import datetime as dt 
+import datetime as dt
 import random as rand
 import healpy as hp
 from MESA2HYDRO.lib import constants as const
@@ -66,10 +66,10 @@ def rho_r(r, MESA_file, masscut, *args, **kwargs):
 		return float(rrho_r)
 	else:
 		print("converge_funcs WARNING: r not found between r0 and r1....end of MESA density values\n")
-		return  
+		return
 
 
-		
+
 def m_r(r, MESA_file, *args, **kwargs):
 
 	all_MESA_m  = MJ.get_quantity(MESA_file,'mass').astype(np.float)
@@ -95,7 +95,7 @@ def m_r(r, MESA_file, *args, **kwargs):
 		return float(rm_r)
 	else:
 		print("converge_funcs WARNING: could not compute m(r) for point")
-		return 
+		return
 
 
 
@@ -109,7 +109,7 @@ def target_Mshell(N,mp):
 	Mshell=N**2.0*12.0*mp
 	return Mshell
 
-def density_integral_numeric(r, rho_r): 
+def density_integral_numeric(r, rho_r):
 	dmdr=4.0*np.pi*(r**2.0)*float(rho_r)
 	return float(dmdr)
 
@@ -117,7 +117,7 @@ def density_integral_numeric(r, rho_r):
 def Mshell_from_RK(rl, rmax, step, MESA_file,masscut, *args,**kwargs):
 	#use_unlog=bool(kwargs.get('load_unlogged',False))
 	### rmax is NOT MODIFIED BY THIS ROUTINE, it is simply a STOPPING CRITERION
-	r = rl      
+	r = rl
 	m=0
 	while r<rmax:
 	    r, m= RK1(r,m, density_integral_numeric, step, MESA_file,masscut)#, load_unlogged=use_unlog)
@@ -126,10 +126,10 @@ def Mshell_from_RK(rl, rmax, step, MESA_file,masscut, *args,**kwargs):
 
 
 
-def Mshell_from_Romberg(rl, rmax, MESA_file, masscut,  *args,**kwargs): 
+def Mshell_from_Romberg(rl, rmax, MESA_file, masscut,  *args,**kwargs):
 	from scipy import integrate
-	from scipy.integrate import romberg, quad 
-	
+	from scipy.integrate import romberg, quad
+
 	steps=float(kwargs.get("steps", 1)) ## global parameter representing order?
 	def fn(r):
 		return density_integral_numeric(r, rho_r(r,MESA_file,masscut))
@@ -179,7 +179,7 @@ def RK1(r, m, fx, h, MESA_file,masscut, *args, **kwargs):
 
 def Romberg_integrate(r, m, fn,\
                       stepsize,  steps, MESA_file, masscut, debug=False, exact=None): #a, b,
-	
+
 	### change these input parameters, should not be passing m or step size; use a, b to represent limits of integral
 	def local_rho(nn):
 			#print("local rho activated")
@@ -215,32 +215,32 @@ def Romberg_integrate(r, m, fn,\
 ##################################################################################
 def get_placement_radii(rmin, rmax, RKstep, TOL, force_N, mp, MESA_file, masscut, outf, *args, **kwargs):
 	lower_convergence_limit = 1.0 - float(TOL)
-	upper_convergence_limit = 1.0 + float(TOL)	
+	upper_convergence_limit = 1.0 + float(TOL)
 
 	Romberg=kwargs.get("Romberg", False)
 	input_RKstep=RKstep
 	fit_region_R   =mn.MESA_r(MESA_file, masscut)
-	fit_region_E   =mn.MESA_E(MESA_file, masscut) 
-	
+	fit_region_E   =mn.MESA_E(MESA_file, masscut)
+
 	Mshell_target=target_Mshell(force_N,mp)
 
 	rl = rmin
-	ru_mass_loop = rl # RKstep 
-	Mshell_integral = 0.0	
+	ru_mass_loop = rl # RKstep
+	Mshell_integral = 0.0
 
-	while ru_mass_loop <= rmax:	
+	while ru_mass_loop <= rmax:
 		while ( (Mshell_integral/Mshell_target) <= lower_convergence_limit)\
-		   or ( (Mshell_integral/Mshell_target) >= upper_convergence_limit): 
+		   or ( (Mshell_integral/Mshell_target) >= upper_convergence_limit):
 
-			try:		
+			try:
 				Mshell_integral = Mshell_from_RK(rl, ru_mass_loop, RKstep, MESA_file, masscut)
 					#Mshell_integral= Mshell_from_quad(rl, ru_mass_loop, MESA_file, masscut)
 				#print("Mshell_integral, ru_mass_loop, stepsize:             ",\
 			 	#	  ('%.3f'%(100.0*Mshell_integral/Mshell_target)), "    ", ru_mass_loop, "   ", RKstep)
-			
+
 			except TypeError:
 				print("converge_funcs ERROR: TypeError in cf.get_placement_radii()")
-				break  	 		 
+				break
 
 			### adapative step size
 			if (Mshell_integral/Mshell_target) >= upper_convergence_limit:
@@ -248,19 +248,18 @@ def get_placement_radii(rmin, rmax, RKstep, TOL, force_N, mp, MESA_file, masscut
 				#print("too high, new step=", RKstep)
 				ru_mass_loop = ru_mass_loop - RKstep
 				Mshell_integral =0.0
-			
+
 
 			elif (Mshell_integral/Mshell_target) <= lower_convergence_limit:
 				# experimental
 				#print("WARNING! no RK doubling")
-				RKstep = RKstep + RKstep   #my version 
-				
+				RKstep = RKstep + RKstep   #my version
+
 				ru_mass_loop = ru_mass_loop + RKstep
 				Mshell_temp=Mshell_integral
 				Mshell_integral =0.0
 			else:
 				pass
-				
 		###############################################################
 		#
 		# reset parameters for journey to next shell
@@ -270,9 +269,9 @@ def get_placement_radii(rmin, rmax, RKstep, TOL, force_N, mp, MESA_file, masscut
 		r_print=(ru_mass_loop + rl)/2.0
 		r_nearest,rdex=find_nearest(fit_region_R,r_print)
 		u_local=fit_region_E[rdex]
-		outf.write("{} {} {} {}".format(force_N, r_print, Mshell_integral, u_local))
+		outf.write("{} {} {} {}\n".format(force_N, r_print, Mshell_integral, u_local))
 
-		RKtemp = RKstep	
+		RKtemp = RKstep
 		Mshell_temp=Mshell_integral
 
 		m_percent = '%.3f'%(100.0*Mshell_temp/Mshell_target)
@@ -289,6 +288,7 @@ def get_placement_radii(rmin, rmax, RKstep, TOL, force_N, mp, MESA_file, masscut
 		RKstep=input_RKstep
 		rl = ru_mass_loop
 		Mshell_integral = 0
+
 	return #
 ##################################################################################
 
@@ -309,7 +309,7 @@ def get_MESA_profile_edge(MESA_file,**kwargs):
 
 	if strip:
 		MESA_file=MJ.strip_MESA_header(MESA_file,MESA_file,n=5)[1]
-	
+
 	try:
 		quantity=MJ.get_quantity(MESA_file,keyword)
 	except KeyError:
@@ -321,7 +321,7 @@ def get_MESA_profile_edge(MESA_file,**kwargs):
 	Mtot=masses[0]
 
 	bound = masscut*Mtot
-	fit_region_indices=np.where( (masses>=bound) )[0]	
+	fit_region_indices=np.where( (masses>=bound) )[0]
 	fit_region  = quantity[fit_region_indices]
 
 	if keyword =='mass':
@@ -354,7 +354,7 @@ def outer_mass(Mtot,fit_region):
 def healpixify(N):
 	NSIDE=int(N)
 	#this is just a straight up array of particle IDs
-	ipix_array=np.arange(hp.nside2npix(NSIDE)) 
+	ipix_array=np.arange(hp.nside2npix(NSIDE))
 	x=[]
 	y=[]
 	z=[]
@@ -441,7 +441,7 @@ def to_Rsun(R_in_cm):
 		for  i in range(len(R_in_cm)):
 			Rs.append(float(R_in_cm[i])/R_to_solar)
 		Rs= np.array(Rs)
-		return Rs 
+		return Rs
 
 def find_nearest(array,value):
     idx = (np.abs(array-value)).argmin()
@@ -457,7 +457,7 @@ def to_log(xq):
 		except TypeError:
 			pass
 	logged = np.array(logged).astype(float)
-	return logged 
+	return logged
 
 
 def unlog(xq):
@@ -468,12 +468,12 @@ def unlog(xq):
 	except:
 		print("error in unlog (MESA2HYDRO/lib/converge_funcs.py")
 		sys.exit()
-	return unlogged 
+	return unlogged
 
 
 def random_theta():
 	#.random gives random float between 0 and 1
-    theta=rand.random()*2.0*np.pi 
+    theta=rand.random()*2.0*np.pi
     return theta
 
 
@@ -505,7 +505,7 @@ def one_over_r(xdata,A,B,C,D):
 	return A*( 1.0/( (D*xdata)-B) ) + C
 
 def get_curve(r_array,rho_array,guess_a,guess_b,guess_c,guess_d,functional_form):
-	import scipy.optimize 
+	import scipy.optimize
 	p=[guess_a,guess_b,guess_c, guess_d]
 	params, cov = curve_fit(functional_form, r_array, rho_array, p0=p)
 	a, b, c,d = params
@@ -514,11 +514,11 @@ def get_curve(r_array,rho_array,guess_a,guess_b,guess_c,guess_d,functional_form)
 
 
 def poly_curve(xdata,ydata,degree):
-	import scipy.optimize 
+	import scipy.optimize
 	p=np.polyfit(xdata,ydata,degree)
 	d=degree
 	if d==2:
-		y=p[0]*(xdata**d) + p[1]*(xdata**(d-1)) +  p[d] 
+		y=p[0]*(xdata**d) + p[1]*(xdata**(d-1)) +  p[d]
 	elif d==3:
 		y=p[0]*(xdata**d) + p[1]*(xdata**(d-1))+ p[2]*(xdata**(d-2)) +  p[d]
 	elif d==4:
