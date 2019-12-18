@@ -271,7 +271,6 @@ def make_IC_Phantom(fname,\
         print(thing, size_type(thing))
         print("")
 
-    mgas = mgas.astype("double").copy()
     #import pdb; pdb.set_trace()
     pygfunc.write_data_phantom_interface.c_gfunc(ngas=ngas,
                                                  mgas=mgas.astype("double"),
