@@ -177,7 +177,7 @@ def get_IC(MESA_file, masscut, NR_file_name,output_filename,mp,which_dtype='f', 
     super_rho=[]
     super_P=[]
     super_E=[]
-
+    
     for i in range(len(N)):
         NSIDE= N[i]
         r_mid= rmid[i]
