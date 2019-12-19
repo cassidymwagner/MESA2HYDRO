@@ -137,12 +137,12 @@ def make_NR_file(MESA_file,masscut,N,mp, RKstep, TOL, NR_file, *args, **kwargs):
     rmax=fit_region_R.max()
 
     outf=NR_file
-    outf.write('## fname'+  str(MESA_file) +\
-               ' masscut'+  str(masscut)+\
-               '   N'+      str(N)+\
-               '  mp (Ms)'+ str(mp/M_to_solar)+\
-               '  mp (g)'+  str(mp)+\
-               '  stepsize'+  str('%1.7e'% RKstep)+ "\n")
+    outf.write('## fname ' +  MESA_file +
+               '  masscut ' + masscut +
+               '    N ' +      N +
+               '   mp (Ms) ' + (mp/M_to_solar) +
+               '   mp (g) ' +  mp +
+               '   stepsize ' +  ('%1.7e'% RKstep) + "\n")
     
     outf.write('#N    (ru+rl)/2 (cm)    Mcontained in shell ru-rl     u(rmid)\n')
 
@@ -150,7 +150,7 @@ def make_NR_file(MESA_file,masscut,N,mp, RKstep, TOL, NR_file, *args, **kwargs):
     cf.get_placement_radii(rmin, rmax, RKstep, TOL,  N, mp, MESA_file,masscut, outf)
 
     print('runtime: ', "%.1f"%(time.time()-start_time), "seconds")
-    outf.write('#\n#\n# runtime: '+ str(time.time()-start_time) + " seconds\n")
+    outf.write('#\n#\n# runtime: ' + time.time()-start_time +  " seconds\n")
 
 
 ##########################################################
